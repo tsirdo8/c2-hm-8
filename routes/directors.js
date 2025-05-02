@@ -4,26 +4,22 @@ const Director = require('../models/Director');
 
 router.get('/', async (req, res) => {
     try {
-        const directors = await Director.find().populate('movies');
+        const directors = await Director.find();
         res.json(directors);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
-
 router.get('/:id', async (req, res) => {
     try {
-        const director = await Director.findById(req.params.id).populate('movies');
-        if (!director) {
-            return res.status(404).json({ message: 'Director not found' });
-        }
+        const director = await Director.findById(req.params.id);
+        if (!director) return res.status(404).json({ message: 'Director not found' });
         res.json(director);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
-
 
 router.post('/', async (req, res) => {
     const director = new Director({
@@ -40,7 +36,6 @@ router.post('/', async (req, res) => {
     }
 });
 
-
 router.put('/:id', async (req, res) => {
     try {
         const director = await Director.findByIdAndUpdate(
@@ -48,15 +43,12 @@ router.put('/:id', async (req, res) => {
             req.body,
             { new: true }
         );
-        if (!director) {
-            return res.status(404).json({ message: 'Director not found' });
-        }
+        if (!director) return res.status(404).json({ message: 'Director not found' });
         res.json(director);
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
 });
-
 
 router.delete('/:id', async (req, res) => {
     try {
@@ -64,10 +56,15 @@ router.delete('/:id', async (req, res) => {
         if (!director) {
             return res.status(404).json({ message: 'Director not found' });
         }
-        res.json({ message: 'Director deleted' });
+
+      
+        await Movie.deleteMany({ director: director._id });
+
+        res.json({ message: 'Director and all their movies deleted' });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
+
 
 module.exports = router;
